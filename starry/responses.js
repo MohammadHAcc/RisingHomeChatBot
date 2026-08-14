@@ -2,13 +2,15 @@
  * starry/responses.js
  *
  * Single source of truth for all of Starry's hardcoded copy.
- * No LLM or AI API is used — every string is static (Story 1 constraint).
+ * No LLM or AI API is used — every string is static.
  *
  * ⚠️  Copy is pending Product Owner approval before launch.
  *     Edit this file only — do not hardcode strings in components.
  */
 
 export const RESPONSES = {
+  // ── Story 1: Introduction ───────────────────────────────────────────────────
+
   /** Auto-renders on page load — AC1, AC2 */
   greeting:
     `Hey there! 👋 I'm Starry, your home-finding guide from Rising Home!\n\n` +
@@ -33,19 +35,68 @@ export const RESPONSES = {
   signInPlaceholder:
     `Great! Sign-in is coming soon. For now, let's get you started as a guest. 😊`,
 
-  /**
-   * Sent when the user types before the intro completes.
-   * Decision tree still shows auth prompt afterward — AC3.
-   */
   offTopic:
     `Hmm, that's a little outside my expertise! 😊 ` +
     `I'm best at helping you find a home. Want to get started?`,
 
-  /**
-   * Sent for unrecognised input at the auth prompt.
-   * Buttons are re-rendered after. Max 2 retries then default to guest.
-   */
   unrecognized:
     `I didn't quite catch that — no worries! ` +
     `Tap a button below or just type "guest" to start browsing.`,
+
+  // ── Story 3: Tour Scheduling ─────────────────────────────────────────────────
+
+  tour: {
+    /** Kicks off the flow — shown after user says "schedule a tour" etc. */
+    initiate:
+      `I'd love to help you book a tour! 🏠\n\n` +
+      `Which property are you interested in? ` +
+      `Tap one below or type the address or neighborhood.`,
+
+    /** After property is selected */
+    askDate:
+      `Great choice! 📅 What date works best for you? ` +
+      `We have availability Monday through Saturday.`,
+
+    /** After date is entered */
+    askTime: `Perfect! What time of day works for you?`,
+
+    /** After time slot is picked */
+    askName: `Almost there! What's your name?`,
+
+    /** After name is entered */
+    askContact:
+      `And what's the best way to reach you? ` +
+      `Drop your email or phone number and we'll send a confirmation.`,
+
+    /**
+     * Final confirmation intro — shown above the summary card.
+     * @param {string} name
+     */
+    confirmIntro: (name) => `You're all set, ${name}! 🎉 Here's your tour summary:`,
+
+    /** Shown below the confirmation card */
+    confirmClose:
+      `A Rising Home agent will confirm your tour within 24 hours. ` +
+      `In the meantime, feel free to keep browsing!`,
+
+    /** Typed input didn't match a known property — accept and move on */
+    propertyAccepted: (address) =>
+      `Got it — I've noted **${address}**. 📅 What date works best for you? ` +
+      `We have availability Monday through Saturday.`,
+
+    /** Bad contact format on first try */
+    badContact:
+      `Hmm, that doesn't look like an email or phone number. ` +
+      `Could you double-check? (e.g. jane@email.com or 312-555-0100)`,
+
+    /** User typed during an active tour step that expects a specific input */
+    midFlowPrompt:
+      `Let's finish booking your tour first! ` +
+      `Answer the question above and we'll get you set up. 😊`,
+  },
+
+  /** Shown in the active step when Starry doesn't recognise the request */
+  activeUnknown:
+    `I'm still learning! 😊 Right now I can help you ` +
+    `**schedule a tour** or browse properties. What would you like to do?`,
 };

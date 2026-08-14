@@ -5,14 +5,16 @@ import { useState, KeyboardEvent } from 'react';
 interface ChatInputProps {
   onSend: (text: string) => void;
   disabled: boolean;
+  /** 'text' (default) | 'date' — switches to a date picker */
+  inputType?: 'text' | 'date';
 }
 
 /**
- * Chat text input bar at the bottom of the chat panel.
- * Disabled during the intro / auth-prompt phase — only unlocks once the
- * user has completed the auth choice.
+ * Chat input bar at the bottom of the chat panel.
+ * Supports plain text and date-picker modes.
+ * Disabled during intro / auth-prompt phase.
  */
-export default function ChatInput({ onSend, disabled }: ChatInputProps) {
+export default function ChatInput({ onSend, disabled, inputType = 'text' }: ChatInputProps) {
   const [value, setValue] = useState('');
 
   const handleSend = () => {
@@ -29,19 +31,21 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
+  const placeholder =
+    disabled      ? 'Choose an option above to continue…'
+    : inputType === 'date' ? 'Pick a date using the calendar…'
+    : 'Ask Starry anything about homes…';
+
   return (
     <div className="flex items-center gap-2 border-t border-slate-200 bg-white px-3 py-2.5">
       <input
-        type="text"
+        type={inputType}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKey}
+        onKeyDown={inputType === 'text' ? handleKey : undefined}
         disabled={disabled}
-        placeholder={
-          disabled
-            ? 'Choose an option above to get started…'
-            : 'Ask Starry anything about homes…'
-        }
+        placeholder={placeholder}
+        min={inputType === 'date' ? new Date().toISOString().split('T')[0] : undefined}
         className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2
                    text-sm text-slate-800 placeholder:text-slate-400
                    focus:outline-none focus:ring-2 focus:ring-brand-400
