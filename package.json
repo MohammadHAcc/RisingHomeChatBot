@@ -1,27 +1,25 @@
 {
-  "name": "rising-home-chatbot",
+  "name": "rising-home",
   "version": "1.0.0",
-  "description": "Starry — Rising Home Facebook Messenger chatbot",
-  "main": "src/index.js",
+  "private": true,
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "jest --runInBand --detectOpenHandles"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.4",
-    "supertest": "^7.0.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": ["**/tests/**/*.test.js"]
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.2"
   }
 }

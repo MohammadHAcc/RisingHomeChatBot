@@ -1,122 +1,103 @@
-# Rising Home — Starry Chatbot
+# Rising Home — Mock Website
 
-Facebook Messenger chatbot for Rising Home. **Starry** is a friendly, jargon-free guide that helps users find neighborhoods, schedule tours, and navigate the site.
+A front-end prototype of the Rising Home rental platform. Browse mock Chicago property listings on an interactive map while chatting with **Starry**, your built-in home-finding guide.
+
+**Tech stack:** Next.js 14 (App Router) · TypeScript · Tailwind CSS · Vercel
 
 ---
 
-## Story 1: Starry Introduction
+## Story 1: Starry Introduction ✅
 
-The first sprint delivers the entry-point conversation:
+Implements the split-screen layout and Starry's opening conversation:
 
-1. Starry greets any new user within **1 second** of their first message.
-2. Introduces its four core capabilities in plain language (no real-estate jargon).
-3. Prompts the user to **Sign In** or **Continue as Guest** using Messenger Quick Reply buttons.
-4. Handles off-topic first messages gracefully and re-routes to the intro.
-
-All responses are **hardcoded strings** — no LLM API is called in this story.
+1. Starry's greeting auto-renders **≤ 500 ms** after page load (AC1 — must be &lt; 1 s)
+2. Introduction lists all four capabilities in plain language — no jargon (AC2, AC4)
+3. Guest / Sign In buttons render below the auth prompt (AC3)
+4. Both button taps and typed equivalents handled by the decision tree
+5. Off-topic input and unrecognised replies handled gracefully
+6. 10 mock Chicago listings visible in the left panel across 4 neighbourhoods
 
 ---
 
 ## Project Structure
 
 ```
-rising-home-chatbot/
-├── src/
-│   ├── index.js          # Express server entry point
-│   ├── webhook.js        # GET + POST /webhook handlers
-│   ├── decisionTree.js   # Rule-based conversation logic
-│   ├── messenger.js      # Facebook Messenger Send API wrapper
-│   ├── responses.js      # Hardcoded response strings & Quick Reply defs
-│   └── sessionStore.js   # In-memory session state
-├── tests/
-│   ├── decisionTree.test.js  # Unit tests — conversation logic
-│   └── webhook.test.js       # Integration tests — HTTP endpoints
-├── .env.example          # Environment variable template
-├── .gitignore
+rising-home/
+├── app/
+│   ├── layout.tsx            Root layout — metadata, font, globals
+│   ├── page.tsx              Renders SplitLayout
+│   └── globals.css           Tailwind directives + custom animations
+├── components/
+│   ├── Layout/
+│   │   └── SplitLayout.tsx   60/40 split container + nav bar
+│   ├── MapPanel/
+│   │   ├── MapPanel.tsx      Left panel — neighbourhood filter + listings
+│   │   ├── MapView.tsx       SVG mock map with zones and property pins
+│   │   └── PropertyCard.tsx  Individual listing card
+│   └── ChatPanel/
+│       ├── ChatPanel.tsx     Chat state, auto-greeting sequence, decision tree
+│       ├── ChatBubble.tsx    Single message bubble (Starry / user)
+│       ├── ChatInput.tsx     Text input bar (locked during intro)
+│       └── QuickReplyButtons.tsx  Sign In / Continue as Guest buttons
+├── starry/
+│   ├── responses.js          All hardcoded Starry copy (single source of truth)
+│   ├── decisionTree.js       Pure keyword-matching conversation logic
+│   └── sessionState.js       Initial state shape
+├── data/
+│   └── mockListings.js       10 hardcoded Chicago properties across 4 neighbourhoods
+├── vercel.json
 └── package.json
 ```
 
 ---
 
-## Prerequisites
-
-| Tool | Version |
-|------|---------|
-| Node.js | ≥ 18.0.0 |
-| npm | ≥ 9.0.0 |
-
----
-
-## Local Setup
+## Local Development
 
 ```bash
-# 1. Clone
-git clone https://github.com/MohammadHAcc/RisingHomeChatBot.git
-cd RisingHomeChatBot
-
-# 2. Install dependencies
+# 1. Install
 npm install
 
-# 3. Configure environment
-cp .env.example .env
-# Edit .env and fill in MESSENGER_VERIFY_TOKEN and MESSENGER_PAGE_ACCESS_TOKEN
-
-# 4. Start in development mode (auto-reload)
+# 2. Run dev server
 npm run dev
-
-# 5. Expose your local server to the internet (Meta requires HTTPS)
-# Example with ngrok:
-ngrok http 3000
-# Copy the https URL and set it as your webhook URL in the Meta Developer App
+# Open http://localhost:3000
 ```
 
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `MESSENGER_VERIFY_TOKEN` | ✅ | Token you set in the Meta Developer App webhook config |
-| `MESSENGER_PAGE_ACCESS_TOKEN` | ✅ | Page Access Token from Meta App → Messenger → Settings |
-| `PORT` | ❌ | Server port (default: `3000`) |
-| `NODE_ENV` | ❌ | `development` or `production` |
+No environment variables are required for Story 1 — everything is hardcoded.
 
 ---
 
-## Webhook Setup (Meta Developer App)
-
-1. Go to **Meta for Developers → Your App → Messenger → Settings**.
-2. Under **Webhooks**, click **Add Callback URL**.
-3. Set the URL to `https://<your-domain>/webhook`.
-4. Set the **Verify Token** to match `MESSENGER_VERIFY_TOKEN` in your `.env`.
-5. Subscribe to the `messages` and `messaging_postbacks` webhook fields.
-
----
-
-## Running Tests
+## Deploy to Vercel
 
 ```bash
-npm test
+# One-time setup
+npm i -g vercel
+vercel login
+
+# Deploy (preview)
+vercel
+
+# Deploy to production
+vercel --prod
 ```
 
-Tests cover:
-- Decision tree: greeting, off-topic, sign-in, guest, unrecognised, complete step
-- Webhook: verification handshake, message dispatch, echo filtering, health check
+Or connect the GitHub repo in the Vercel dashboard → Framework: Next.js → no env vars needed.
 
 ---
 
-## Conversation Flow (Story 1)
+## Conversation Flow
 
 ```
-User sends any message
-  └─> Greeting (4 capabilities listed)
-        └─> Auth prompt + [Sign In] [Continue as Guest] buttons
-              ├─> "sign in" / AUTH_SIGN_IN  → "Sign-in coming soon!"  (placeholder)
-              ├─> "guest"  / AUTH_GUEST     → "Welcome, guest!"       (placeholder)
-              └─> Anything else             → Clarification + re-show buttons
+Page loads
+  └─> [typing indicator]
+        └─> Greeting (≤ 500 ms)         — lists 4 capabilities, no jargon
+              └─> Auth prompt (≤ 1 200 ms) + [ Sign In ] [ Continue as Guest ]
+                    ├─> Button / "sign in" → placeholder ack → chat unlocks
+                    ├─> Button / "guest"   → welcome ack    → chat unlocks
+                    └─> anything else      → clarification + re-show buttons
+                                            (max 2 retries, then default to guest)
 
-User sends off-topic first message
-  └─> Off-topic nudge → Greeting → Auth prompt (same as above)
+User types before intro finishes
+  └─> Off-topic nudge → auth prompt + buttons
 ```
 
 ---
@@ -125,25 +106,21 @@ User sends off-topic first message
 
 | Item | Owner |
 |------|-------|
-| Meta Developer App credentials & Page access token | Dev team |
-| Production HTTPS endpoint / deployment | Dev team |
-| Final copy approval for Starry's intro message | Product Owner |
+| Final copy approval — Starry's intro messages | Product Owner |
+| Mock listing images (replace gradient placeholders) | Dev / Design |
+| Real Leaflet map vs. static mock — confirm approach | Dev team |
+| Tailwind design token decisions (colours, fonts) | Design |
+| Vercel project created + team access granted | Dev team |
 | GDPR / CCPA compliance review | Legal |
-| Facebook Messenger API cost evaluation | Product Owner |
-| Replace in-memory session store with Redis/DynamoDB | Dev team (Story 2+) |
 
 ---
 
 ## Out of Scope — Story 1
 
-- Neighborhood / property recommendations
+- Property filtering / search logic
+- Clicking a property to reference it in chat
 - Tour scheduling
-- Renting vs. buying tips
-- Account creation / real authentication
-- Any channel other than Facebook Messenger
-
----
-
-## License
-
-Internal project — Rising Home / Accenture. Not for public distribution.
+- Renting vs. buying tips responses
+- Real authentication / account creation
+- Mobile / responsive layout
+- Any external API (map tiles, data, AI)
